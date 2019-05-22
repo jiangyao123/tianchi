@@ -81,5 +81,5 @@ plt.subplot(224)
 d=plt.bar(x_1,y_4,fc='g')
 plt.show()
 plt.bar(x,y,fc='grey')
-data_user.day=pd.to_datetime(data_user.day)      
+     
       
