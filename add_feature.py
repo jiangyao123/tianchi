@@ -70,6 +70,7 @@ def user_feature(data,end_date):
     pd.set_option('mode.use_inf_as_na', True)
     user_feature=user_feature.fillna(0)
     return user_feature
+    
 #构建特征item行为次数、转化率    
 def item_feature(data,end_date):
     daybefore_1=data[data['day']==end_date- datetime.timedelta(days=1)]
@@ -140,56 +141,59 @@ def user_category_feature(data,end_date):
     user_category_feature=user_category_feature.fillna(0)
     return user_category_feature
     
-    if __name__ == '__main__':
-    import datetime
-    data['buy_or_not']=data['behavior_type']//4 
-    datelist=list(set(pd.date_range('2014-11-22', freq = 'D', periods =20))|set(pd.date_range('2014-12-13', freq = 'D', periods =5)))
-    train_data=pd.DataFrame()
-    for i in range(25):
-        end_date=datelist[i]
-        a=data[['user_id','item_id','item_category','buy_or_not']][data['day']==end_date].drop_duplicates()
-        user_item_feature_result=user_item_feature(data,end_date)
-        user_feature_result=user_feature(data,end_date)
-        item_feature_result=item_feature(data,end_date)
-        user_category_feature_result=user_category_feature(data,end_date)
-        a=pd.merge(a,user_item_feature_result,how='left',on=['user_id','item_id'],sort=False)
-        a=pd.merge(a,user_feature_result,how='left',on='user_id',sort=False)
-        a=pd.merge(a,item_feature_result,how='left',on='item_id',sort=False)
-        a=pd.merge(a,user_category_feature_result,how='left',on=['user_id','item_category'],sort=False)
-        a=a.fillna(0)
-        train_data=train_data.append(a)
-    train_data.to_csv('train.csv',index=False)
-    test_data=data[['user_id','item_id','item_category','buy_or_not']][data['day']=='2014-12-18'].drop_duplicates()
-    test_user_item_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))
-    test_user_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))
-    test_item_feature_result=item_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))
-    test_user_category_feature_result=user_category_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))    
-    test_data=pd.merge(test_data,test_user_item_feature_result,how='left',on=['user_id','item_id'],sort=False)
-    test_data=pd.merge(test_data,test_user_feature_result,how='left',on='user_id',sort=False)
-    test_data=pd.merge(test_data,test_item_feature_result,how='left',on='item_id',sort=False)
-    test_data=pd.merge(test_data,test_user_category_feature_result,how='left',on=['user_id','item_category'],sort=False)
-    test_data=test_data.fillna(0)
-    test_data.to_csv('test.csv',index=False)
-    pred_X=data[['user_id','item_id','item_category']][data['behavior_type']==4].drop_duplicates()
-    pred_user_item_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
-    pred_item_feature_result=item_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
-    pred_user_category_feature_result=user_category_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
-    pred_user_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
-    pred_X=pd.merge(pred_X,pred_user_item_feature_result,how='left',on=['user_id','item_id'],sort=False)
-    pred_X=pd.merge(pred_X,pred_user_feature_result,how='left',on='user_id',sort=False)
-    pred_X=pd.merge(pred_X,pred_item_feature_result,how='left',on='item_id',sort=False)
-    pred_X=pd.merge(pred_X,pred_user_category_feature_result,how='left',on=['user_id','item_category'],sort=False)
-    pred_X=pred_X.fillna(0)
-    pred_X.to_csv('pred_X.csv',index=False)
-    
+if __name__ == '__main__':
+import datetime
+data['buy_or_not']=data['behavior_type']//4 
+#构建训练集
+datelist=list(set(pd.date_range('2014-11-22', freq = 'D', periods =20))|set(pd.date_range('2014-12-13', freq = 'D', periods =5)))
+train_data=pd.DataFrame()
+for i in range(25):
+    end_date=datelist[i]
+    a=data[['user_id','item_id','item_category','buy_or_not']][data['day']==end_date].drop_duplicates()
+    user_item_feature_result=user_item_feature(data,end_date)
+    user_feature_result=user_feature(data,end_date)
+    item_feature_result=item_feature(data,end_date)
+    user_category_feature_result=user_category_feature(data,end_date)
+    a=pd.merge(a,user_item_feature_result,how='left',on=['user_id','item_id'],sort=False)
+    a=pd.merge(a,user_feature_result,how='left',on='user_id',sort=False)
+    a=pd.merge(a,item_feature_result,how='left',on='item_id',sort=False)
+    a=pd.merge(a,user_category_feature_result,how='left',on=['user_id','item_category'],sort=False)
+    a=a.fillna(0)
+    train_data=train_data.append(a)
+train_data.to_csv('train.csv',index=False)
+#构建测试集
+test_data=data[['user_id','item_id','item_category','buy_or_not']][data['day']=='2014-12-18'].drop_duplicates()
+test_user_item_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))
+test_user_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))
+test_item_feature_result=item_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))
+test_user_category_feature_result=user_category_feature(data,end_date=datetime.datetime.strptime('2014-12-18','%Y-%m-%d'))    
+test_data=pd.merge(test_data,test_user_item_feature_result,how='left',on=['user_id','item_id'],sort=False)
+test_data=pd.merge(test_data,test_user_feature_result,how='left',on='user_id',sort=False)
+test_data=pd.merge(test_data,test_item_feature_result,how='left',on='item_id',sort=False)
+test_data=pd.merge(test_data,test_user_category_feature_result,how='left',on=['user_id','item_category'],sort=False)
+test_data=test_data.fillna(0)
+test_data.to_csv('test.csv',index=False)
+#构建需要预测12-19的特征集
+pred_X=data[['user_id','item_id','item_category']][data['behavior_type']==4].drop_duplicates()
+pred_user_item_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
+pred_item_feature_result=item_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
+pred_user_category_feature_result=user_category_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
+pred_user_feature_result=user_item_feature(data,end_date=datetime.datetime.strptime('2014-12-19','%Y-%m-%d'))
+pred_X=pd.merge(pred_X,pred_user_item_feature_result,how='left',on=['user_id','item_id'],sort=False)
+pred_X=pd.merge(pred_X,pred_user_feature_result,how='left',on='user_id',sort=False)
+pred_X=pd.merge(pred_X,pred_item_feature_result,how='left',on='item_id',sort=False)
+pred_X=pd.merge(pred_X,pred_user_category_feature_result,how='left',on=['user_id','item_category'],sort=False)
+pred_X=pred_X.fillna(0)
+pred_X.to_csv('pred.csv',index=False)
+
+from sklearn.metrics import f1_score
+from xgboost.sklearn import XGBClassifier
 train_data=pd.read_csv(r'C:\train.csv')
 test_data=pd.read_csv(r'C:\test.csv')
 train_x=train_data.drop(columns=['buy_or_not','item_id','user_id','item_category'])
 train_y=train_data['buy_or_not']
 test_x=test_data.drop(columns=['buy_or_not','item_id','user_id','item_category'])
 y_true=test_data['buy_or_not']
-from sklearn.metrics import f1_score
-from xgboost.sklearn import XGBClassifier
 model=XGBClassifier(scale_pos_weight=10)
 model.fit(train_x.values,train_y.values.ravel())
 y_pred = model.predict(test_x.values)
